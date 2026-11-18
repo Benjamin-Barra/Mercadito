@@ -11,7 +11,7 @@ class DetalleVentaForm(forms.ModelForm):
         fields = ("producto", "cantidad")
         widgets = {
             "producto": forms.Select(attrs={"class": "form-select"}),
-            "cantidad": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "cantidad": forms.NumberInput(attrs={"class": "form-control", "min": 1, "placeholder" : "Cantidad Productos"}),
         }
 
     def __init__(self, *args, **kwargs):

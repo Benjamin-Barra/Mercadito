@@ -1,4 +1,4 @@
-# Promps de IA
+# Promps de IA con Claude
 
 # PROMP 1 ORIENTADO A base.html
 
