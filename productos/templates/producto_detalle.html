@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ producto.nombre }} | Mercadito{% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'productos:catalogo' %}">Catálogo</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ producto.nombre }}</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm border-0" style="max-width: 600px;">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span class="fs-5"><i class="bi bi-box-seam me-2"></i>{{ producto.nombre }}</span>
+        <span class="badge text-bg-primary">{{ producto.categoria.nombre }}</span>
+    </div>
+    <div class="card-body">
+        <p class="display-6 text-primary fw-semibold">${{ producto.precio|intcomma }}</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Stock</span>
+                <span>
+                    {% if producto.stock == 0 %}
+                        <span class="badge text-bg-danger">Sin stock</span>
+                    {% elif producto.stock <= 5 %}
+                        <span class="badge text-bg-warning">{{ producto.stock }} (bajo)</span>
+                    {% else %}
+                        <span class="badge text-bg-success">{{ producto.stock }}</span>
+                    {% endif %}
+                </span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Estado</span>
+                <span>{% if producto.activo %}Activo{% else %}Inactivo{% endif %}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Fecha de ingreso</span>
+                <span>{{ producto.fecha_ingreso|date:"d/m/Y" }}</span>
+            </li>
+        </ul>
+    </div>
+    <div class="card-footer bg-white">
+        <a href="{% url 'productos:catalogo' %}" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
+        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'productos:producto_edit' producto.pk %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Editar
+            </a>
+            <a href="{% url 'productos:producto_del' producto.pk %}" class="btn btn-danger btn-sm">
+                <i class="bi bi-trash me-1"></i>Eliminar
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

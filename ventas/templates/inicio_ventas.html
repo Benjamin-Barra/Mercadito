@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Mercadito | Inicio{% endblock %}
+
+{% block content %}
+    <!-- Tarjetas de resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card bg-dark text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="small text-white-50"><i class="bi bi-cash-stack me-1"></i>Caja estimada</div>
+                    <div class="display-6 fw-semibold">${{ caja|intcomma }}</div>
+                    <div class="small text-white-50 mt-2">
+                        Efectivo ${{ caja_efectivo|intcomma }} · Tarjeta ${{ caja_tarjeta|intcomma }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="small text-muted"><i class="bi bi-receipt me-1"></i>Ventas de hoy</div>
+                    <div class="display-6 fw-semibold text-primary">${{ hoy_total|intcomma }}</div>
+                    <div class="small text-muted mt-2">{{ hoy_cantidad }} venta{{ hoy_cantidad|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="small text-muted"><i class="bi bi-hourglass-split me-1"></i>Fiado por cobrar</div>
+                    <div class="display-6 fw-semibold text-warning">${{ fiado_pendiente|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Últimas ventas -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-clock-history me-2"></i>Últimas ventas
+        </div>
+        {% if ultimas_ventas %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>N°</th>
+                        <th>Fecha</th>
+                        <th>Pago</th>
+                        <th>Productos</th>
+                        <th class="text-end">Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ultimas_ventas %}
+                    <tr>
+                        <td>#{{ venta.n_venta }}</td>
+                        <td>{{ venta.fecha_emision|date:"d/m H:i" }}</td>
+                        <td>
+                            {{ venta.get_tipo_pago_display }}
+                            {% if venta.fiado_a %}<small class="text-muted">({{ venta.fiado_a }})</small>{% endif %}
+                        </td>
+                        <td>
+                            {% for d in venta.detalles.all %}
+                                {{ d.cantidad }} x {{ d.producto.nombre }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="text-end">${{ venta.total_venta|intcomma }}</td>
+                        <td>
+                            {% if venta.pagado %}
+                                <span class="badge text-bg-success">Pagada</span>
+                            {% else %}
+                                <span class="badge text-bg-warning">Pendiente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body text-muted">Todavía no hay ventas registradas.</div>
+        {% endif %}
+    </div>
+    <!-- Stock bajo -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-exclamation-triangle me-2"></i>Productos con stock bajo</span>
+            <span class="badge text-bg-warning">{{ prod_bajo|length }}</span>
+        </div>
+        {% if prod_bajo %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-end">Stock</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in prod_bajo %}
+                    <tr>
+                        <td>{{ prod.nombre }}</td>
+                        <td class="text-end">{{ prod.stock }}</td>
+                        <td>
+                            {% if prod.stock == 0 %}
+                                <span class="badge text-bg-danger">Sin stock</span>
+                            {% else %}
+                                <span class="badge text-bg-warning">Stock bajo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white">
+            <a href="{% url 'productos:catalogo' %}" class="small text-decoration-none">
+                Ver catálogo completo <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <p class="text-success mb-0">
+                <i class="bi bi-check-circle me-2"></i>Todo el stock está en buen nivel.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

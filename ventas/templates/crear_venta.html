@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Crear venta{% endblock %}
+
+{% block content %}
+    <section class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="h4 mb-4">Crear venta</h1>
+
+            <form method="post"
+                onsubmit="this.querySelector('button[type=submit]').disabled = true">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <h2 class="h6 mt-4">Productos</h2>
+                {{ formset.management_form }}
+                {{ formset.non_form_errors }}
+
+                <div id="filas">
+                    {% for f in formset %}
+                        <div class="row g-2 mb-2 fila">
+                            {{ f.id }}
+                            <div class="col-md-7">{{ f.producto }}{{ f.producto.errors }}</div>
+                            <div class="col-md-3">{{ f.cantidad }}{{ f.cantidad.errors }}</div>
+                            <div class="col-md-2">
+                                {% if f.instance.pk %}{{ f.DELETE }}{% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" id="agregar" class="btn btn-outline-primary btn-sm mb-3">
+                    <i class="bi bi-plus-lg"></i> Agregar producto
+                </button>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Crear venta</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <template id="fila-vacia">
+        <div class="row g-2 mb-2 fila">
+            <div class="col-md-7">{{ formset.empty_form.producto }}</div>
+            <div class="col-md-3">{{ formset.empty_form.cantidad }}</div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger quitar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const tipoPago = document.querySelector("#id_tipo_pago");
+    const fiadoInput = document.querySelector("#id_fiado_a");
+    const fiadoContenedor = fiadoInput.closest("p"); 
+
+    function actualizarFiado() {
+        const esFiado = tipoPago.value === "FIADO";
+        fiadoContenedor.classList.toggle("d-none", !esFiado);
+        fiadoInput.required = esFiado;
+        if (!esFiado) fiadoInput.value = "";
+    }
+
+    tipoPago.addEventListener("change", actualizarFiado);
+    actualizarFiado(); 
+
+    const total = document.querySelector("#id_detalles-TOTAL_FORMS");
+    const contenedor = document.querySelector("#filas");
+
+    document.querySelector("#agregar").addEventListener("click", () => {
+        const html = document.querySelector("#fila-vacia").innerHTML
+            .replaceAll("__prefix__", total.value);
+        contenedor.insertAdjacentHTML("beforeend", html);
+        total.value = parseInt(total.value) + 1;
+    });
+
+    contenedor.addEventListener("click", (e) => {
+        const boton = e.target.closest(".quitar");
+        if (boton) boton.closest(".fila").remove();
+    });
+</script>
+{% endblock %}
